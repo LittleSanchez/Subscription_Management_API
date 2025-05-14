@@ -1,5 +1,6 @@
 from app.db import db
 
+
 class SubscriptionPlan(db.Model):
     __tablename__ = "subscription_plans"
 

@@ -3,6 +3,7 @@ from app.db import db
 from datetime import datetime
 from flask_bcrypt import generate_password_hash, check_password_hash
 
+
 class User(db.Model):
     __tablename__ = "users"
 
