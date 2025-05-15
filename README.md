@@ -35,5 +35,29 @@ Focus: **efficient database queries**, clean architecture, and testability.
 git clone https://github.com/LittleSanchez/Subscription_Management_API.git
 cd Subscription_Management_API
 
+# Create and activate virtualenv
+python -m venv venv
+source venv/bin/activate  # or venv\Scripts\activate on Windows
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Set environment variable
+export FLASK_APP=run.py
+export FLASK_ENV=development
+export DATABASE_URL=postgresql+psycopg2://postgres:postgres@localhost:5435/subscriptions
+export JWT_SECRET_KEY=super-secret
+
+# I'm aware that this is not the best practice for production, but just to simplify the setup
+
+
+# Initialize DB
+flask db upgrade
+
+# Run the app
+flask run
+
+# OR
+
 docker compose up # Or docker-compose up
 ```
