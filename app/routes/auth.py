@@ -4,6 +4,7 @@ from flask_jwt_extended import (
     jwt_required,
     get_jwt,
 )
+from flasgger import swag_from
 
 from app.db import db
 from app.models.user import User
@@ -14,6 +15,12 @@ bp = Blueprint("auth", __name__, url_prefix="/auth")
 
 
 @bp.route("/register", methods=["POST"])
+@swag_from({
+    "responses": {
+        "201": {"description": "User registered successfully"},
+        "400": {"description": "Missing required fields or validation error"}
+    }
+})
 def register():
     data = request.get_json()
 
@@ -43,6 +50,12 @@ def register():
 
 
 @bp.route("/login", methods=["POST"])
+@swag_from({
+    "responses": {
+        "200": {"description": "User logged in successfully"},
+        "401": {"description": "Invalid credentials"}
+    }
+})
 def login():
     data = request.get_json()
     email = data.get("email")
@@ -70,6 +83,12 @@ def login():
 
 @bp.route("/logout", methods=["POST"])
 @jwt_required()
+@swag_from({
+    "responses": {
+        "200": {"description": "Logged out successfully"},
+        "401": {"description": "Unauthorized"}
+    }
+})
 def logout():
     jti = get_jwt()["jti"]
     add_to_blocklist(jti)

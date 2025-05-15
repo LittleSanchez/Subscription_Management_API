@@ -3,6 +3,7 @@ from flask import Flask
 from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
 from dotenv import load_dotenv
+from flasgger import Swagger
 
 from app.db import db
 from app.utils.token_blocklist import is_token_revoked
@@ -25,6 +26,7 @@ def create_app():
     db.init_app(app)
     jwt = JWTManager(app)
     Migrate(app, db)
+    Swagger(app)
 
     @jwt.token_in_blocklist_loader
     def check_if_token_revoked(jwt_header, jwt_payload):

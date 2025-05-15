@@ -1,11 +1,18 @@
 from flask import Blueprint, request, jsonify
 from app.db import db
 from app.models.subscription_plan import SubscriptionPlan
+from flasgger import swag_from
 
 bp = Blueprint("plans", __name__, url_prefix="/plans")
 
 
 @bp.route("/", methods=["POST"])
+@swag_from({
+    "responses": {
+        "201": {"description": "Plan created successfully"},
+        "400": {"description": "Missing fields or duplicate plan"}
+    }
+})
 def create_plan():
     data = request.get_json()
     name = data.get("name")
@@ -26,6 +33,11 @@ def create_plan():
 
 
 @bp.route("/", methods=["GET"])
+@swag_from({
+    "responses": {
+        "200": {"description": "List of subscription plans"}
+    }
+})
 def list_plans():
     plans = SubscriptionPlan.query.all()
     return jsonify(

@@ -2,6 +2,7 @@ from datetime import datetime, timedelta, timezone
 
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
+from flasgger import swag_from
 
 from app.db import db
 from app.models.user import User
@@ -12,6 +13,13 @@ bp = Blueprint("subscriptions", __name__, url_prefix="/subscriptions")
 
 
 @bp.route("/subscribe", methods=["POST"])
+@swag_from({
+    "responses": {
+        "201": {"description": "Subscription activated"},
+        "400": {"description": "Missing email or plan_id"},
+        "404": {"description": "User or plan not found"}
+    }
+})
 def subscribe():
     data = request.get_json()
     email = data.get("email")
@@ -59,6 +67,13 @@ def subscribe():
 
 @bp.route("/active", methods=["GET"])
 @jwt_required()
+@swag_from({
+    "responses": {
+        "200": {"description": "Active subscription details"},
+        "404": {"description": "No active subscription"},
+        "401": {"description": "Unauthorized"}
+    }
+})
 def get_active_subscription():
     user_id = get_jwt_identity()
 
@@ -86,6 +101,13 @@ def get_active_subscription():
 
 @bp.route("/cancel", methods=["POST"])
 @jwt_required()
+@swag_from({
+    "responses": {
+        "200": {"description": "Subscription cancelled"},
+        "404": {"description": "No active subscription to cancel"},
+        "401": {"description": "Unauthorized"}
+    }
+})
 def cancel_subscription():
     user_id = get_jwt_identity()
 
