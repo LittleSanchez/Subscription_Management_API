@@ -32,8 +32,8 @@ Focus: **efficient database queries**, clean architecture, and testability.
 
 ```bash
 # Clone the repo
-git clone https://github.com/your-username/subscription-management-api.git
-cd subscription-management-api
+git clone https://github.com/LittleSanchez/Subscription_Management_API.git
+cd Subscription_Management_API
 
 # Create and activate virtualenv
 python -m venv venv
