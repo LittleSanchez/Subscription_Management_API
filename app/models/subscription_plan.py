@@ -9,5 +9,5 @@ class SubscriptionPlan(db.Model):
     price = db.Column(db.Numeric(10, 2), nullable=False)
     duration_days = db.Column(db.Integer, nullable=False)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<Plan {self.name}>"

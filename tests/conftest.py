@@ -3,7 +3,7 @@ from app import create_app
 from app.db import db
 
 
-@pytest.fixture
+@pytest.fixture(scope="function")
 def app():
     app = create_app()
     app.config.update(
@@ -22,6 +22,6 @@ def app():
         db.drop_all()
 
 
-@pytest.fixture
+@pytest.fixture()
 def client(app):
     return app.test_client()

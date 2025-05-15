@@ -1,6 +1,7 @@
-from app.db import db
-from datetime import datetime
 import uuid
+from datetime import datetime, timezone
+
+from app.db import db
 
 
 class UserSubscription(db.Model):
@@ -15,15 +16,14 @@ class UserSubscription(db.Model):
         db.Integer, db.ForeignKey("subscription_plans.id"), nullable=False
     )
 
-    start_date = db.Column(db.DateTime, default=datetime.utcnow)
+    start_date = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     end_date = db.Column(db.DateTime, nullable=True)
-
     is_active = db.Column(db.Boolean, default=True, index=True)
 
-    user = db.relationship("User", backref=db.backref("subscriptions", lazy=True))
+    user = db.relationship("User", backref=db.backref("subscriptions", lazy="dynamic"))
     plan = db.relationship(
-        "SubscriptionPlan", backref=db.backref("subscriptions", lazy=True)
+        "SubscriptionPlan", backref=db.backref("subscriptions", lazy="dynamic")
     )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<Subscription user={self.user_id} plan={self.plan_id} active={self.is_active}>"

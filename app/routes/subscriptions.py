@@ -1,10 +1,12 @@
+from datetime import datetime, timedelta, timezone
+
 from flask import Blueprint, request, jsonify
+from flask_jwt_extended import jwt_required, get_jwt_identity
+
 from app.db import db
 from app.models.user import User
 from app.models.subscription_plan import SubscriptionPlan
 from app.models.user_subscription import UserSubscription
-from datetime import datetime, timedelta
-from flask_jwt_extended import jwt_required, get_jwt_identity
 
 bp = Blueprint("subscriptions", __name__, url_prefix="/subscriptions")
 
@@ -15,24 +17,29 @@ def subscribe():
     email = data.get("email")
     plan_id = data.get("plan_id")
 
-    user = User.query.filter_by(email=email).first()
+    if not email or not plan_id:
+        return jsonify({"message": "Email and plan_id are required"}), 400
+
+    user = User.query.filter_by(email=email.strip().lower()).first()
     if not user:
         return jsonify({"message": "User not found"}), 404
 
-    plan = SubscriptionPlan.query.get(plan_id)
+    plan = db.session.get(SubscriptionPlan, plan_id)
     if not plan:
         return jsonify({"message": "Plan not found"}), 404
 
+    # Деактивація поточної активної підписки
     current = UserSubscription.query.filter_by(user_id=user.id, is_active=True).first()
     if current:
         current.is_active = False
-        current.end_date = datetime.utcnow()
+        current.end_date = datetime.now(timezone.utc)
 
+    # Створення нової підписки
     new_subscription = UserSubscription(
         user_id=user.id,
         plan_id=plan.id,
-        start_date=datetime.utcnow(),
-        end_date=datetime.utcnow() + timedelta(days=plan.duration_days),
+        start_date=datetime.now(timezone.utc),
+        end_date=datetime.now(timezone.utc) + timedelta(days=plan.duration_days),
         is_active=True,
     )
     db.session.add(new_subscription)
@@ -90,7 +97,7 @@ def cancel_subscription():
         return jsonify({"message": "No active subscription to cancel"}), 404
 
     subscription.is_active = False
-    subscription.end_date = datetime.utcnow()
+    subscription.end_date = datetime.now(timezone.utc)
     db.session.commit()
 
     return jsonify({"message": "Subscription cancelled"}), 200

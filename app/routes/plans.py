@@ -12,6 +12,9 @@ def create_plan():
     price = data.get("price")
     duration = data.get("duration_days")
 
+    if not all([name, price, duration]):
+        return jsonify({"message": "All fields are required"}), 400
+
     if SubscriptionPlan.query.filter_by(name=name).first():
         return jsonify({"message": "Plan already exists"}), 400
 

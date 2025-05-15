@@ -1,9 +1,14 @@
 from flask import Blueprint, request, jsonify
+from flask_jwt_extended import (
+    create_access_token,
+    jwt_required,
+    get_jwt,
+)
+
 from app.db import db
 from app.models.user import User
-from flask_jwt_extended import create_access_token
-from flask_jwt_extended import jwt_required, get_jwt
 from app.utils.token_blocklist import add_to_blocklist
+from app.utils.validators import PasswordValidationError
 
 bp = Blueprint("auth", __name__, url_prefix="/auth")
 
@@ -11,16 +16,26 @@ bp = Blueprint("auth", __name__, url_prefix="/auth")
 @bp.route("/register", methods=["POST"])
 def register():
     data = request.get_json()
-    email = data.get("email")
-    password = data.get("password")
-    name = data.get("name")
-    surname = data.get("surname")
+
+    required_fields = ["email", "password", "name", "surname"]
+    if not all(field in data for field in required_fields):
+        return jsonify({"message": "Missing required fields"}), 400
+
+    email = data["email"].strip().lower()
+    name = data["name"].strip()
+    surname = data["surname"].strip()
+    password = data["password"]
 
     if User.query.filter_by(email=email).first():
         return jsonify({"message": "User already exists"}), 400
 
     user = User(email=email, name=name, surname=surname)
-    user.set_password(password)
+
+    try:
+        user.set_password(password)
+    except PasswordValidationError as e:
+        return jsonify({"message": str(e)}), 400
+
     db.session.add(user)
     db.session.commit()
 
